@@ -4,8 +4,10 @@ from typing import Optional
 import logging
 import time
 import json
+from utils.tokenStore import set_token
 
-from HitApi import call_chat_api
+
+from hitApi import call_chat_api
 
 app = FastAPI(title="Blueverse API Wrapper")
 
@@ -26,7 +28,10 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO)
 
-
+class TokenRequest(BaseModel):
+    token: str
+    
+    
 # 📦 Request Schema
 class ChatRequest(BaseModel):
     type: str
@@ -47,6 +52,15 @@ def clean_llm_output(raw: str) -> str:
 
     return raw
 
+@app.post("/token1")
+def set_primary_token(req: TokenRequest):
+    set_token("primary", req.token)
+    return {"status": "primary token set"}
+
+@app.post("/token2")
+def set_fallback_token(req: TokenRequest):
+    set_token("fallback", req.token)
+    return {"status": "fallback token set"}
 
 @app.get("/")
 def health():
