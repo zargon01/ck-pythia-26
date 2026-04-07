@@ -7,7 +7,7 @@ import json
 from utils.tokenStore import set_token
 
 
-from HitApi import call_chat_api
+from hitApi import call_chat_api
 
 app = FastAPI(title="Blueverse API Wrapper")
 
@@ -46,7 +46,6 @@ def clean_llm_output(raw: str) -> str:
 
     raw = raw.strip()
 
-    # Remove markdown wrappers like ```json ... ```
     if raw.startswith("```"):
         raw = raw.replace("```json", "").replace("```", "").strip()
 
@@ -72,13 +71,11 @@ def chat(req: ChatRequest):
     start_time = time.time()
 
     try:
-        # 🔧 Build query
         final_query = req.query
 
         if req.current_code:
             final_query += f"\n\nExisting Code:\n{req.current_code}"
 
-        # 🔥 Strong instruction for structured output
         final_query += """
         
 STRICTLY return ONLY valid JSON.
@@ -91,7 +88,6 @@ Format:
 }
 """
 
-        # 📡 Call API
         response = call_chat_api(req.type, final_query)
 
         if not response.ok:
@@ -106,7 +102,6 @@ Format:
         except Exception:
             data = {}
 
-        # ✅ Extract metadata
         model = data.get("responseSource", "unknown")
         backend_time = data.get("execution_time", None)
 
@@ -115,7 +110,6 @@ Format:
         code = raw_output
         explanation = ""  # ALWAYS present
 
-        # 🔍 Clean + parse LLM output
         cleaned_output = clean_llm_output(raw_output)
 
         try:
@@ -127,7 +121,6 @@ Format:
         except Exception:
             logging.warning("⚠️ Failed to parse LLM JSON, using fallback")
 
-        # ⏱ Total response time
         response_time = round(time.time() - start_time, 3)
 
         return {
