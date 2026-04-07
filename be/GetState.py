@@ -7,7 +7,7 @@ def run():
         browser = p.chromium.launch(headless=False)
 
         # Always create fresh context (don't load old state)
-        context = browser.new_context(storage_state=AUTH_STATE_PATH)
+        context = browser.new_context()
         page = context.new_page()
 
         print("🌐 Opening login page...")
